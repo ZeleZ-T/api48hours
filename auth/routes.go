@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"api48hours/models"
 	"api48hours/repository"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
@@ -136,7 +137,7 @@ func bindData(w http.ResponseWriter, r *http.Request, data *request) bool {
 }
 
 type request struct {
-	*User
+	*models.User
 }
 
 func (a *request) Bind(r *http.Request) error {

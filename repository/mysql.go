@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"api48hours/auth"
+	"api48hours/models"
 	"database/sql"
 )
 
@@ -13,8 +13,8 @@ func NewMySQLRepository(db *sql.DB) *MySQLRepository {
 	return &MySQLRepository{db: db}
 }
 
-func (r *MySQLRepository) FindUserByEmail(email string) (auth.User, error) {
-	var user auth.User
+func (r *MySQLRepository) FindUserByEmail(email string) (models.User, error) {
+	var user models.User
 	query := "SELECT email, password FROM users WHERE email = ?"
 	err := r.db.QueryRow(query, email).Scan(&user.Email, &user.Password)
 	if err != nil {
@@ -23,7 +23,7 @@ func (r *MySQLRepository) FindUserByEmail(email string) (auth.User, error) {
 	return user, nil
 }
 
-func (r *MySQLRepository) CreateUser(user auth.User) error {
+func (r *MySQLRepository) CreateUser(user models.User) error {
 	query := "INSERT INTO users (email, password) VALUES (?, ?)"
 	_, err := r.db.Exec(query, user.Email, user.Password)
 	return err
