@@ -1,0 +1,24 @@
+services:
+  db:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: pass
+      MYSQL_DATABASE: database
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  app:
+    build: .
+    command: go run main.go
+    volumes:
+      - .:/app
+    ports:
+      - "3210:3210"
+    depends_on:
+      - db
+
+volumes:
+  db_data:
