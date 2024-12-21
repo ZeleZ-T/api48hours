@@ -20,14 +20,14 @@ func register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !validEmail(data.email) || !validPassword(data.password) {
+	if !validEmail(data.Email) || !validPassword(data.Password) {
 		render.Status(r, http.StatusBadRequest)
 		render.Render(w, r, nil)
 		return
 	}
 
 	var err error
-	if data.password, err = hashPassword(data.password); err != nil {
+	if data.Password, err = hashPassword(data.Password); err != nil {
 		render.Status(r, http.StatusInternalServerError)
 		render.Render(w, r, nil)
 		return
@@ -47,7 +47,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !verifyPassword(data.password, "hash") {
+	if !verifyPassword(data.Password, "hash") {
 		render.Status(r, http.StatusUnauthorized)
 		render.Render(w, r, nil)
 		return
@@ -65,7 +65,7 @@ func changePassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !validPassword(data.password) {
+	if !validPassword(data.Password) {
 		render.Status(r, http.StatusBadRequest)
 		render.Render(w, r, nil)
 		return
