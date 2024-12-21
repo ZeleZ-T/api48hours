@@ -8,4 +8,7 @@ require (
 	golang.org/x/crypto v0.31.0
 )
 
-require github.com/ajg/form v1.5.1 // indirect
+require (
+	github.com/ajg/form v1.5.1 // indirect
+	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect
+)
