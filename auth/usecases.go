@@ -3,6 +3,7 @@ package auth
 import (
 	"golang.org/x/crypto/bcrypt"
 	"strings"
+	"time"
 )
 
 func hashPassword(password string) (string, error) {
@@ -15,8 +16,12 @@ func verifyPassword(password, hash string) bool {
 	return err == nil
 }
 
+func generateJWT(email string, time time.Time) string {
+	return email
+}
+
 func validPassword(password string) bool {
-	lenght := len(password) >= 8
+	length := len(password) >= 8
 	caps := false
 	lower := false
 	number := false
@@ -31,7 +36,7 @@ func validPassword(password string) bool {
 		}
 	}
 
-	return lenght && caps && lower && number
+	return length && caps && lower && number
 }
 
 func validEmail(email string) bool {
