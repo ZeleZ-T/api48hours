@@ -1,7 +1,10 @@
 package auth
 
 import (
+	"fmt"
+	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
+	"log"
 	"strings"
 	"time"
 )
@@ -17,7 +20,33 @@ func verifyPassword(password, hash string) bool {
 }
 
 func generateJWT(email string, time time.Time) string {
-	return email
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"email": email,
+		"time":  time.UTC(),
+	})
+
+	tokenString, _ := token.SignedString("secret key")
+	return tokenString
+}
+
+func ValidateJWT(tokenString string) (string, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return "secret key", nil
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok {
+		if time.Since(time.Unix(int64(claims["time"].(float64)), 0)) > time.Hour*1 {
+			return "", fmt.Errorf("token expired")
+		}
+		return claims["email"].(string), nil
+	}
+	return "", err
 }
 
 func validPassword(password string) bool {

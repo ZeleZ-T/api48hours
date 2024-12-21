@@ -1,9 +1,11 @@
 package auth
 
 import (
+	"api48hours/repository"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 	"net/http"
+	"time"
 )
 
 func SetRoutes(r *chi.Mux) {
@@ -26,16 +28,15 @@ func register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var err error
-	if data.Password, err = hashPassword(data.Password); err != nil {
+	data.Password, _ = hashPassword(data.Password)
+
+	if err := repository.MySqlRepo.CreateUser(*data.User); err != nil {
 		render.Status(r, http.StatusInternalServerError)
 		render.Render(w, r, nil)
 		return
 	}
 
-	print(data)
-
-	w.Write([]byte("registered"))
+	w.Write([]byte("registered" + data.Email))
 	render.Status(r, http.StatusOK)
 	render.Render(w, r, nil)
 }
@@ -47,13 +48,17 @@ func login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !verifyPassword(data.Password, "hash") {
+	hash, _ := repository.MySqlRepo.FindUserByEmail(data.Email)
+
+	if !verifyPassword(data.Password, hash.Password) {
 		render.Status(r, http.StatusUnauthorized)
 		render.Render(w, r, nil)
 		return
 	}
 
-	w.Write([]byte("logged in"))
+	jwt := generateJWT(data.Email, time.Now())
+
+	w.Write([]byte("logged in: " + jwt))
 	render.Status(r, http.StatusOK)
 	render.Render(w, r, nil)
 }
@@ -65,13 +70,28 @@ func changePassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if emailJWT, err := ValidateJWT(r.Header.Get("Authorization")); emailJWT != data.Email || err != nil {
+		if err.Error() == "token expired" {
+			w.Write([]byte("token expired"))
+		}
+		render.Status(r, http.StatusUnauthorized)
+		render.Render(w, r, nil)
+		return
+	}
+
 	if !validPassword(data.Password) {
 		render.Status(r, http.StatusBadRequest)
 		render.Render(w, r, nil)
 		return
 	}
 
-	print(data)
+	data.Password, _ = hashPassword(data.Password)
+
+	if err := repository.MySqlRepo.ChangePassword(data.Email, data.Password); err != nil {
+		render.Status(r, http.StatusInternalServerError)
+		render.Render(w, r, nil)
+		return
+	}
 
 	w.Write([]byte("password changed"))
 	render.Status(r, http.StatusOK)
@@ -85,9 +105,20 @@ func deleteAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// auth
+	if emailJWT, err := ValidateJWT(r.Header.Get("Authorization")); emailJWT != data.Email || err != nil {
+		if err.Error() == "token expired" {
+			w.Write([]byte("token expired"))
+		}
+		render.Status(r, http.StatusUnauthorized)
+		render.Render(w, r, nil)
+		return
+	}
 
-	// delete
+	if err := repository.MySqlRepo.DeleteAccount(data.Email); err != nil {
+		render.Status(r, http.StatusInternalServerError)
+		render.Render(w, r, nil)
+		return
+	}
 
 	w.Write([]byte("account deleted"))
 	render.Status(r, http.StatusOK)
