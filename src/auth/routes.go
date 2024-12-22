@@ -25,11 +25,16 @@ func register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !validEmail(data.Email) {
+	emailExists := repository.MySqlRepo.EmailExists(data.Email)
+	if !validEmail(data.Email) || emailExists {
+		message := "invalid email"
+		if emailExists {
+			message = "email already registered"
+		}
 		render.Status(r, http.StatusBadRequest)
 		render.Render(w, r, httpRender.ErrInvalidRequest(
-			errors.New("invalid email"),
-			"invalid email"),
+			errors.New(message),
+			message),
 		)
 		return
 	}

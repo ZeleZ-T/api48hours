@@ -90,7 +90,7 @@ func ErrInvalidRequest(err error, message string) render.Renderer {
 
 func ErrServerInternal(err error, message string) render.Renderer {
 	return &ErrResponse{
-		HTTPStatusCode: http.StatusOK,
+		HTTPStatusCode: http.StatusInternalServerError,
 		Status: models.ResponseMeta{
 			AppStatusCode: http.StatusInternalServerError,
 			Message:       "ERROR",

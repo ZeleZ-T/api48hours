@@ -2,7 +2,6 @@ package repository
 
 import (
 	"database/sql"
-	"fmt"
 	"github.com/go-sql-driver/mysql"
 )
 
@@ -18,10 +17,9 @@ func Start(cfg mysql.Config) error {
 	if pingErr != nil {
 		return pingErr
 	}
-	fmt.Println("Connected!")
 
 	err = error(nil)
-	connection, err := sql.Open("mysql", "root:password@tcp")
+	connection, err := sql.Open("mysql", "root:pass@/database")
 	if err != nil {
 		return err
 	}
