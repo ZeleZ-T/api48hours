@@ -1,12 +1,10 @@
 package auth
 
 import (
-	"fmt"
+	"errors"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
-	"log"
 	"strings"
-	"time"
 )
 
 func hashPassword(password string) (string, error) {
@@ -19,10 +17,9 @@ func verifyPassword(password, hash string) bool {
 	return err == nil
 }
 
-func generateJWT(email string, time time.Time) (string, error) {
+func generateJWT(email string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"email": email,
-		"time":  time.UTC(),
 	})
 
 	tokenString, err := token.SignedString([]byte("secret key"))
@@ -32,22 +29,21 @@ func generateJWT(email string, time time.Time) (string, error) {
 
 func ValidateJWT(tokenString string) (string, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		if _, ok := token.Method.(jwt.SigningMethod); !ok {
+			return nil, errors.New("unexpected signing method")
 		}
-		return "secret key", nil
+		return []byte("secret key"), nil
 	})
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
-	if claims, ok := token.Claims.(jwt.MapClaims); ok {
-		if time.Since(time.Unix(int64(claims["time"].(float64)), 0)) > time.Hour*1 {
-			return "", fmt.Errorf("token expired")
-		}
+	var claims jwt.MapClaims
+	var ok bool
+	if claims, ok = token.Claims.(jwt.MapClaims); ok {
 		return claims["email"].(string), nil
 	}
-	return "", err
+	return "", errors.New("unexpected")
 }
 
 func validPassword(password string) bool {
