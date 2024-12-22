@@ -8,7 +8,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 	"net/http"
-	"time"
+	"strings"
 )
 
 func SetRoutes(r *chi.Mux) {
@@ -91,7 +91,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 
 	var jwt string
 	var err error
-	if jwt, err = generateJWT(data.Email, time.Now()); err != nil {
+	if jwt, err = generateJWT(data.Email); err != nil {
 		render.Status(r, http.StatusInternalServerError)
 		render.Render(w, r, httpRender.ErrServerInternal(
 			err, "could not create token"))
@@ -110,13 +110,9 @@ func changePassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if emailJWT, err := ValidateJWT(r.Header.Get("Authorization")); emailJWT != data.Email || err != nil {
-		message := "invalid token"
-		if err.Error() == "token expired" {
-			message = "token expired"
-		}
 		render.Status(r, http.StatusUnauthorized)
 		render.Render(w, r, httpRender.ErrInvalidRequest(
-			err, message))
+			err, "invalid token"))
 		return
 	}
 
@@ -140,7 +136,8 @@ func changePassword(w http.ResponseWriter, r *http.Request) {
 
 	if err := repository.MySqlRepo.ChangePassword(data.Email, data.Password); err != nil {
 		render.Status(r, http.StatusInternalServerError)
-		render.Render(w, r, nil)
+		render.Render(w, r, httpRender.ErrServerInternal(
+			err, "could not change password"))
 		return
 	}
 
@@ -151,22 +148,23 @@ func changePassword(w http.ResponseWriter, r *http.Request) {
 func deleteAccount(w http.ResponseWriter, r *http.Request) {
 	data := &request{}
 
-	if !bindData(w, r, data) {
+	if bindData(w, r, data) {
 		return
 	}
 
-	if emailJWT, err := ValidateJWT(r.Header.Get("Authorization")); emailJWT != data.Email || err != nil {
-		if err.Error() == "token expired" {
-			w.Write([]byte("token expired"))
-		}
+	token := strings.Split(r.Header.Values("Authorization")[0], " ")[1]
+	println(token)
+
+	if emailJWT, err := ValidateJWT(token); emailJWT != data.Email || err != nil {
 		render.Status(r, http.StatusUnauthorized)
-		render.Render(w, r, nil)
+		render.Render(w, r, httpRender.ErrInvalidRequest(err, "unauthorized"))
 		return
 	}
 
 	if err := repository.MySqlRepo.DeleteAccount(data.Email); err != nil {
 		render.Status(r, http.StatusInternalServerError)
-		render.Render(w, r, nil)
+		render.Render(w, r, httpRender.ErrServerInternal(
+			err, "could not delete account"))
 		return
 	}
 
