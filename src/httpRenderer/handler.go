@@ -61,10 +61,6 @@ type ErrResponse struct {
 	AppCode        int64               `json:"code,omitempty"`
 }
 
-func WrapHandlerFunc(route string, name string, handler http.HandlerFunc) (string, http.HandlerFunc) {
-	return route, handler
-}
-
 func NewSuccessResponse(status int, data interface{}) *Response {
 	return &Response{
 		Status: &models.ResponseMeta{

@@ -19,14 +19,15 @@ func verifyPassword(password, hash string) bool {
 	return err == nil
 }
 
-func generateJWT(email string, time time.Time) string {
+func generateJWT(email string, time time.Time) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"email": email,
 		"time":  time.UTC(),
 	})
 
-	tokenString, _ := token.SignedString("secret key")
-	return tokenString
+	tokenString, err := token.SignedString([]byte("secret key"))
+
+	return tokenString, err
 }
 
 func ValidateJWT(tokenString string) (string, error) {
