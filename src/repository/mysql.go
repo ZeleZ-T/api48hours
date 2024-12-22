@@ -13,6 +13,16 @@ func NewMySQLRepository(db *sql.DB) *MySQLRepository {
 	return &MySQLRepository{db: db}
 }
 
+func (r *MySQLRepository) EmailExists(email string) bool {
+	var exists bool
+	query := "SELECT EXISTS(SELECT 1 FROM users WHERE email = ?)"
+	err := r.db.QueryRow(query, email).Scan(&exists)
+	if err != nil {
+		return false
+	}
+	return exists
+}
+
 func (r *MySQLRepository) FindUserByEmail(email string) (models.User, error) {
 	var user models.User
 	query := "SELECT email, password FROM users WHERE email = ?"

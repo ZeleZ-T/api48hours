@@ -9,13 +9,15 @@ import (
 )
 
 func main() {
-	repository.Start(mysql.Config{
+	if err := repository.Start(mysql.Config{
 		User:   "root",
 		Passwd: "pass",
 		Net:    "tcp",
 		Addr:   "localhost:3306",
 		DBName: "database",
-	})
+	}); err != nil {
+		println(err.Error())
+	}
 
 	r := chi.NewRouter()
 
