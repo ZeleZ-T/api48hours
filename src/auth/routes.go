@@ -74,7 +74,7 @@ func register(w http.ResponseWriter, r *http.Request) {
 func login(w http.ResponseWriter, r *http.Request) {
 	data := &request{}
 
-	if !bindData(w, r, data) {
+	if bindData(w, r, data) {
 		return
 	}
 
@@ -89,7 +89,14 @@ func login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jwt := generateJWT(data.Email, time.Now())
+	var jwt string
+	var err error
+	if jwt, err = generateJWT(data.Email, time.Now()); err != nil {
+		render.Status(r, http.StatusInternalServerError)
+		render.Render(w, r, httpRender.ErrServerInternal(
+			err, "could not create token"))
+		return
+	}
 
 	render.Status(r, http.StatusOK)
 	render.Render(w, r, httpRender.NewSuccessResponse(http.StatusOK, jwt))
@@ -98,7 +105,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 func changePassword(w http.ResponseWriter, r *http.Request) {
 	data := &request{}
 
-	if !bindData(w, r, data) {
+	if bindData(w, r, data) {
 		return
 	}
 
@@ -137,9 +144,8 @@ func changePassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte("password changed"))
 	render.Status(r, http.StatusOK)
-	render.Render(w, r, nil)
+	render.Render(w, r, httpRender.NewSuccessResponse(http.StatusOK, "password changed"))
 }
 
 func deleteAccount(w http.ResponseWriter, r *http.Request) {
