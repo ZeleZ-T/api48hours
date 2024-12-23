@@ -153,7 +153,6 @@ func deleteAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	token := strings.Split(r.Header.Values("Authorization")[0], " ")[1]
-	println(token)
 
 	if emailJWT, err := ValidateJWT(token); emailJWT != data.Email || err != nil {
 		render.Status(r, http.StatusUnauthorized)

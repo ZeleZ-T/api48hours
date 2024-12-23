@@ -1,32 +1,17 @@
 package noiseMap
 
 import (
+	"api48hours/models"
 	"errors"
 	"github.com/KEINOS/go-noise"
 	"math"
 )
 
-type MapCreationParams struct {
-	Seed            int64
-	Height          int
-	Width           int
-	Smoothness      float64
-	WaterSmoothness float64
-	NoiseType       noise.Algo
+func NullMap() models.WorldMap {
+	return models.WorldMap{Seed: 0, Height: 0, Width: 0, MapData: nil}
 }
 
-type WorldMap struct {
-	Seed    int64
-	Height  int
-	Width   int
-	MapData map[int]map[int]float64
-}
-
-func NullMap() WorldMap {
-	return WorldMap{Seed: 0, Height: 0, Width: 0, MapData: nil}
-}
-
-func MapCreation(params MapCreationParams) (WorldMap, error) {
+func MapCreation(params models.MapCreationParams) (models.WorldMap, error) {
 
 	output := make(map[int]map[int]float64)
 
@@ -49,11 +34,11 @@ func MapCreation(params MapCreationParams) (WorldMap, error) {
 			}
 			output[y] = line
 		}
-		return WorldMap{
-				params.Seed,
-				params.Height,
-				params.Width,
-				output},
+		return models.WorldMap{
+				Seed:    params.Seed,
+				Height:  params.Height,
+				Width:   params.Width,
+				MapData: output},
 			nil
 	}
 	return NullMap(), errors.New("noise generation failed")

@@ -1,6 +1,7 @@
 package noiseMap
 
 import (
+	"api48hours/models"
 	"errors"
 	"github.com/mazznoer/colorgrad"
 	"image"
@@ -8,7 +9,7 @@ import (
 	"math"
 )
 
-func MapPlainImage(worldMap *WorldMap) (image.Image, error) {
+func MapPlainImage(worldMap *models.WorldMap) (image.Image, error) {
 	MapData := worldMap.MapData
 
 	colorSet := map[string]color.Color{
@@ -62,7 +63,7 @@ func MapPlainImage(worldMap *WorldMap) (image.Image, error) {
 	return img, nil
 }
 
-func MapGradientImage(worldMap *WorldMap) (image.Image, error) {
+func MapGradientImage(worldMap *models.WorldMap) (image.Image, error) {
 	gradient, _ := colorgrad.NewGradient().
 		Colors(
 			colorgrad.Rgb8(77, 66, 155, 255),
