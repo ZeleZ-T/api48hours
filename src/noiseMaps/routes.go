@@ -9,7 +9,9 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 	"image"
+	"image/png"
 	"net/http"
+	"os"
 	"strings"
 )
 
@@ -59,6 +61,19 @@ func createMap(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		mapImage = image.NewRGBA(image.Rect(0, 0, 1, 1))
 		message = "map created but image could not be generated"
+	}
+
+	imgName := strings.Replace(email, "@", "_at_", -1)
+	imgName = strings.Replace(imgName, ".", "_dot_", -1)
+	if f, err := os.Create("data/" + imgName + ".png"); err == nil {
+		if err = png.Encode(f, mapImage); err == nil {
+			println("image saved")
+		} else {
+			println("could not save image")
+		}
+		f.Close()
+	} else {
+		println("could not save image")
 	}
 
 	render.Status(r, http.StatusCreated)

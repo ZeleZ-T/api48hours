@@ -3,7 +3,7 @@ services:
     image: mysql:latest
     environment:
       MYSQL_ROOT_PASSWORD: pass
-      MYSQL_DATABASE: database
+      MYSQL_DATABASE: map_database
     ports:
       - "3306:3306"
     volumes:

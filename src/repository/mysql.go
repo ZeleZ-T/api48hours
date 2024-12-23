@@ -81,8 +81,6 @@ func (r *MySQLRepository) SaveMap(email string, params models.MapSaveParams) err
 		return err
 	}
 
-	println(paramsID)
-
 	query = "INSERT INTO maps (name, owner, params_id) VALUES (?, ?, ?)"
 	_, err = tx.Exec(query, params.Name, email, paramsID)
 	if err != nil {
