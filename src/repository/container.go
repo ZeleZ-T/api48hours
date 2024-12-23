@@ -19,7 +19,7 @@ func Start(cfg mysql.Config) error {
 	}
 
 	err = error(nil)
-	connection, err := sql.Open("mysql", "root:pass@/database")
+	connection, err := sql.Open("mysql", "root:pass@/map_database")
 	if err != nil {
 		return err
 	}

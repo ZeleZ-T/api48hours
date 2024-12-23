@@ -35,7 +35,7 @@ func Error(err interface{}) *HTTPErr {
 		}
 	default:
 		return &HTTPErr{
-			Err:  errors.New("Unknown error"),
+			Err:  errors.New("unknown error"),
 			Code: http.StatusInternalServerError,
 		}
 	}
